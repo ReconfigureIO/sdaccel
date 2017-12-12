@@ -1,3 +1,5 @@
+// +build opencl
+
 /**********
 Copyright (c) 2016, Xilinx, Inc.
 All rights reserved.
@@ -148,7 +150,7 @@ xcl_world xcl_world_single() {
 	size_t i;
 	for(i = 0; i < num_platforms; i++) {
 		size_t platform_name_size;
-		err = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME, 
+		err = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME,
 		                        0, NULL, &platform_name_size);
 		if( err != CL_SUCCESS) {
 			printf("Error: Could not determine platform name!\n");
@@ -479,7 +481,7 @@ unsigned long xcl_run_kernel3d(xcl_world world, cl_kernel krnl,
 }
 
 void xcl_run_kernel3d_nb(xcl_world world, cl_kernel krnl,cl_event *event,
-                               size_t x, size_t y, size_t z) { 
+                               size_t x, size_t y, size_t z) {
 	size_t size[3] = {x, y, z};
 
 	int err = clEnqueueNDRangeKernel(world.command_queue, krnl, 3,
