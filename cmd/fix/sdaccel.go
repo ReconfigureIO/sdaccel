@@ -20,6 +20,7 @@ var sdaccel = fix{
 
 func sdaccelFix(f *ast.File) bool {
 	ret := false
+	ret = rewriteImport(f, "xcl", "github.com/ReconfigureIO/sdaccel/xcl") || ret
 	ret = rewriteImport(f, "sdaccel", "github.com/ReconfigureIO/sdaccel") || ret
 	ret = rewriteImport(f, "sdaccel/control", "github.com/ReconfigureIO/sdaccel/control") || ret
 	ret = rewriteImport(f, "axi", "github.com/ReconfigureIO/sdaccel/axi") || ret
