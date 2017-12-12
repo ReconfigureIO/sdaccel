@@ -6,3 +6,31 @@ go:
 
 script:
   - make test
+  - make all
+
+deploy:
+  provider: releases
+  api_key:
+    secure: "F3sXhpMX7iX2ubqi/Z42o1jmUozYjQdtOWDwJhWi00wDFIBXD8cmCC5+Cry+R2dOINkMTh69PbP7vYEkZvDEcBNUbVZpkieSXC46RGSzDFDH8wI2ACp24APWYprUBx4YPJsfNNmFnhdFgEQFBWIfUq1arI5w11oVlcNivnHnj0xAgVEBWFyRSy3h2uLqeVogem3EmRPAFdLJCplGzIZfiL7Bcnu5+yIUsSFGQJqWpDb0OWxfyZWqPQdt5kV3R8akhXHXuVkoAHgr3rtopoSG2wpxn/LJpenkmApNV0XpU7+DIm5x30XETjnSP9iZyrVnCxFF/gNDCTtnX73VF0mkIdlgnIlWEqZpr37MJtlaEFfrzbTICrkwDTqnf5TBzYE/AlCFOdO6vRnCtQ8oFBdUetAAFCpTLpQLTGThO/NijWZtn0EiVTsH+vP7kxnQrdgAD+m5lNKIdJuDWGnGsuKYUncTFE8akZErpe39XF5aqk5ikYCBhVVXFXiX8oAtNG060XkGdDXPb0mgpPJusodgm4Zp36O7PfElIcS1Z4mpMFoUqekJNoHM/oRP53MpQJY4xgakejFTpxgjejXkhUWNcOZbE3C9/lEF0d4VMVA0ip4Mb3q90vwqMgutq6GSgbkFlwf4Ck8Xf8Bcl4BLq2T7rhmJDRJKnnCs0UKWyT3cBBM="
+  file: dist/fix
+  on:
+    repo: ReconfigureIO/sdaccel
+  # don't delete the artifacts from previous phases
+  skip_cleanup: true
+  # deploy when a new tag is pushed
+  on:
+    tags: true
+
+branches:
+  only:
+    # Pushes and PR to the master branch
+    - master
+    # IMPORTANT Ruby regex to match tags. Required, or travis won't trigger deploys when a new tag
+    # is pushed. This regex matches semantic versions like v1.2.3-rc4+2016.02.22
+    - /^v\d+\.\d+\.\d+.*$/
+
+notifications:
+  email:
+    on_success: never
+  slack:
+    secure: "U4q5cKk3X9A6p/6YpKc78RGgPFW6MPJYHLrLGIK8Ht+GizgjhF1jDPGo+TK9hYi30/3oCgtlor9Ui0CHV2u554OaBlcomo2vGwbjis5dFV2HxCa73yWpKGbXMbgpFVOzwJSPPdzreGPGVvSpbIKtAlHa7pZVA9i9XB2HyclmDN936vqzUrVmlv8tVG1bId+GzSYxgnK2eBA/ZX6Aqlddh5BwPQN4i0XYo3+yVrsiWhHeYAi32kK6w/xsVVGx6ENxHnxJtNKicapZe7Xe598rcs+H7739XdzehJicnWp9V9GemHZ2FQr4VyaZbZ919K7mQQUfgsBQGahX+De2hIr1awkD+pmY5b9r08JbkFzqs0PEJv8Z17qX/f0cVfDhogwaDiL6sKRzBKExBCd/BQhxrEzlv/GVvhpJH6oIbJeayyxDL1mmeu0VoRQ/qEkr4qNcCKeTN+TAAKRQ1JQlw1dQPZXM0ggjcSmtOf4ih6jZxcqJAexp8xcytFnz6zUShVpVGYdiAJx9LW3k5C5zo9QcCyM8jII/DDUyST7y0xnqC/m4jbKznVRc9QRyRSmPp8uHHZTVrknZ0vbiJpFz6RBYKRt85vmtYa+vEQip7BaRdWfIlgLqNr5G/D+RX3habdBwlei1jzSXtHJhvJBq0p1g3my01LbwZDLLY0p2asP7SzE="

@@ -8,7 +8,18 @@ BUILDER := $(shell echo "`git config user.name` <`git config user.email`>")
 PKG_RELEASE ?= 1
 PROJECT_URL := "https://github.com/ReconfigureIO/$(NAME)"
 
-.PHONY: test
+.PHONY: test all
+
+CMD_SOURCES := $(shell go list ./... | grep /cmd/)
+TARGETS := $(patsubst github.com/ReconfigureIO/sdaccel/cmd/%,dist/%,$(CMD_SOURCES))
+
+all: ${TARGETS}
 
 test:
 	go test -v $$(go list ./... | grep -v /vendor/ | grep -v /cmd/)
+
+dist:
+	mkdir -p dist
+
+dist/%: cmd/% | dist
+	go build -ldflags "$(LDFLAGS)" -o $@ $<
