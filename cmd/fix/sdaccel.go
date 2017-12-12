@@ -26,5 +26,6 @@ func sdaccelFix(f *ast.File) bool {
 	ret = rewriteImport(f, "axi", "github.com/ReconfigureIO/sdaccel/axi") || ret
 	ret = rewriteImport(f, "axi/protocol", "github.com/ReconfigureIO/sdaccel/axi/protocol") || ret
 	ret = rewriteImport(f, "axi/arbitrate", "github.com/ReconfigureIO/sdaccel/axi/arbitrate") || ret
+	ret = rewriteImport(f, "axi/memory", "github.com/ReconfigureIO/sdaccel/axi/memory") || ret
 	return ret
 }
