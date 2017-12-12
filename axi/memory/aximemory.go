@@ -22,7 +22,7 @@ Package memory provides high level operations for working an AXI bus
 package memory
 
 import (
-	"axi/protocol"
+	"github.com/ReconfigureIO/sdaccel/axi/protocol"
 )
 
 //

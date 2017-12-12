@@ -19,7 +19,7 @@ Package arbitrate provides reusable arbitrators for AXI transations.
 package arbitrate
 
 import (
-	"axi/protocol"
+	"github.com/ReconfigureIO/sdaccel/axi/protocol"
 )
 
 //
@@ -273,7 +273,6 @@ func ReadArbitrateX2(
 	// Run read data channel handler.
 	go func() {
 		for {
-			var readData protocol.ReadData
 			chanSelect := <-dataChanSelect
 
 			// Terminate transfers on write data channel 'last' flag.
@@ -326,7 +325,6 @@ func ReadArbitrateX3(
 	// Run read data channel handler.
 	go func() {
 		for {
-			var readData protocol.ReadData
 			chanSelect := <-dataChanSelect
 
 			// Terminate transfers on write data channel 'last' flag.
@@ -386,7 +384,6 @@ func ReadArbitrateX4(
 	// Run read data channel handler.
 	go func() {
 		for {
-			var readData protocol.ReadData
 			chanSelect := <-dataChanSelect
 
 			// Terminate transfers on write data channel 'last' flag.
