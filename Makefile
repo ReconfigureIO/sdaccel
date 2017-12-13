@@ -22,4 +22,4 @@ dist:
 	mkdir -p dist
 
 dist/%: cmd/% | dist
-	go build -ldflags "$(LDFLAGS)" -o $@ $<
+	go build -ldflags "$(LDFLAGS)" -o $@ github.com/ReconfigureIO/sdaccel/$<
