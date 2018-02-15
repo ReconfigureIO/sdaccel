@@ -21,19 +21,17 @@ const (
 )
 
 //
-// Constants specifying the supported SMI memory write options.
+// Default options constant
 //
 const (
-	SmiMemWriteOptDefault = uint8(0x00) // Use default buffered write options.
-	SmiMemWriteOptDirect  = uint8(0x01) // Perform direct unbuffered write.
+	DefaultOptions = uint8(0x00) // Use default buffered read or write.
 )
 
 //
-// Constants specifying the supported SMI memory read options.
+// Constants specifying the supported SMI memory access options.
 //
 const (
-	SmiMemReadOptDefault = uint8(0x00) // Use default buffered read options.
-	SmiMemReadOptDirect  = uint8(0x01) // Perform direct unbuffered read.
+	MemOptUnbuffered = uint8(0x01) // Perform direct unbuffered read or write.
 )
 
 //
