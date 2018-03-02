@@ -1397,7 +1397,7 @@ func WriteBurstUInt64(
 		}
 		writeOk = writeOk && writeSingleBurstUInt64(
 			smiWriteChan, smiResponse, writeAddr, writeOptions, burstSize, writeDataChan)
-		writeAddr += uintptr(burstSize)
+		writeAddr += uintptr(burstSize << 3)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(smiMemBurst64Len)
 	}
@@ -1437,7 +1437,7 @@ func WriteBurstUInt32(
 		}
 		writeOk = writeOk && writeSingleBurstUInt32(
 			smiWriteChan, smiResponse, writeAddr, writeOptions, burstSize, writeDataChan)
-		writeAddr += uintptr(burstSize)
+		writeAddr += uintptr(burstSize << 2)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(smiMemBurst32Len)
 	}
@@ -1477,7 +1477,7 @@ func WriteBurstUInt16(
 		}
 		writeOk = writeOk && writeSingleBurstUInt16(
 			smiWriteChan, smiResponse, writeAddr, writeOptions, burstSize, writeDataChan)
-		writeAddr += uintptr(burstSize)
+		writeAddr += uintptr(burstSize << 1)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(smiMemBurst16Len)
 	}
@@ -2029,7 +2029,7 @@ func ReadBurstUInt64(
 		}
 		readOk = readOk && readSingleBurstUInt64(
 			smiRequest, smiReadChan, readAddr, readOptions, burstSize, readDataChan)
-		readAddr += uintptr(burstSize)
+		readAddr += uintptr(burstSize << 3)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(smiMemBurst64Len)
 	}
@@ -2069,7 +2069,7 @@ func ReadBurstUInt32(
 		}
 		readOk = readOk && readSingleBurstUInt32(
 			smiRequest, smiReadChan, readAddr, readOptions, burstSize, readDataChan)
-		readAddr += uintptr(burstSize)
+		readAddr += uintptr(burstSize << 2)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(smiMemBurst32Len)
 	}
@@ -2109,7 +2109,7 @@ func ReadBurstUInt16(
 		}
 		readOk = readOk && readSingleBurstUInt16(
 			smiRequest, smiReadChan, readAddr, readOptions, burstSize, readDataChan)
-		readAddr += uintptr(burstSize)
+		readAddr += uintptr(burstSize << 1)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(smiMemBurst16Len)
 	}
