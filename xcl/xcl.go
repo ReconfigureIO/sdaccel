@@ -309,7 +309,7 @@ Run will start execution of the Kernel. Most uses of this should be called as
 
 */
 func (kernel *Kernel) Run(_ ...uint) error {
-	size := C.size_t(0)
+	size := C.size_t(1)
 	event := new(C.cl_event)
 
 	errCode := C.clEnqueueNDRangeKernel(kernel.program.world.cw.command_queue, kernel.kernel, 1,
