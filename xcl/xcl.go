@@ -321,6 +321,14 @@ func (kernel *Kernel) Run(_ ...uint) error {
 		return err
 	}
 
+	errCode = C.clFlush(kernel.program.world.cw.command_queue)
+
+	err = errorCode(errCode)
+
+	if err != nil {
+		return err
+	}
+
 	errCode = C.clWaitForEvents(1, event)
 
 	err = errorCode(errCode)
