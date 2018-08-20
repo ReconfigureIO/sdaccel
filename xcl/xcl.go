@@ -312,8 +312,8 @@ func (kernel *Kernel) Run(_ ...uint) error {
 	size := C.size_t(0)
 	event := new(C.cl_event)
 
-	errCode := C.clEnqueueNDRangeKernel(kernel.program.world.cw.command_queue, krnl.kernel, 1,
-		nil, &size, &size, 0, nil, &event)
+	errCode := C.clEnqueueNDRangeKernel(kernel.program.world.cw.command_queue, kernel.kernel, 1,
+		nil, &size, &size, 0, nil, event)
 
 	err := errorCode(errCode)
 
@@ -321,7 +321,7 @@ func (kernel *Kernel) Run(_ ...uint) error {
 		return err
 	}
 
-	errCode = cl.WaitForEvents(1, *event)
+	errCode = C.clWaitForEvents(1, event)
 
 	err = errorCode(errCode)
 
