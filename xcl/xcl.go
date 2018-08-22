@@ -314,25 +314,18 @@ func (kernel *Kernel) Run(_ ...uint) error {
 
 	errCode := C.clEnqueueNDRangeKernel(kernel.program.world.cw.command_queue, kernel.kernel, 1,
 		nil, &size, &size, 0, nil, event)
-
 	err := errorCode(errCode)
-
 	if err != nil {
 		return err
 	}
 
 	errCode = C.clFlush(kernel.program.world.cw.command_queue)
-
 	err = errorCode(errCode)
-
 	if err != nil {
 		return err
 	}
 
 	errCode = C.clWaitForEvents(1, event)
-
 	err = errorCode(errCode)
-
 	return err
-
 }
