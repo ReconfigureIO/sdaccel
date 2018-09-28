@@ -68,24 +68,29 @@ type Flit64 struct {
 // TODO: Update once there is a fix for the channel size compiler limitation.
 //
 func ForwardFrame64(
+	forwardReq <-chan bool,
 	smiInput <-chan Flit64,
-	smiOutput chan<- Flit64) {
+	smiOutput chan<- Flit64,
+	forwardDone chan<- bool) {
 	smiBuffer := make(chan Flit64, 34 /* SmiMemFrame64Size */)
 
-	go func() {
-		hasNextInputFlit := true
-		for hasNextInputFlit {
-			inputFlitData := <-smiInput
-			smiBuffer <- inputFlitData
-			hasNextInputFlit = inputFlitData.Eofc == uint8(0)
-		}
-	}()
+	for <-forwardReq {
+		go func() {
+			hasNextInputFlit := true
+			for hasNextInputFlit {
+				inputFlitData := <-smiInput
+				smiBuffer <- inputFlitData
+				hasNextInputFlit = inputFlitData.Eofc == uint8(0)
+			}
+		}()
 
-	hasNextOutputFlit := true
-	for hasNextOutputFlit {
-		outputFlitData := <-smiBuffer
-		smiOutput <- outputFlitData
-		hasNextOutputFlit = outputFlitData.Eofc == uint8(0)
+		hasNextOutputFlit := true
+		for hasNextOutputFlit {
+			outputFlitData := <-smiBuffer
+			smiOutput <- outputFlitData
+			hasNextOutputFlit = outputFlitData.Eofc == uint8(0)
+		}
+		forwardDone <- true
 	}
 }
 
@@ -98,22 +103,27 @@ func ForwardFrame64(
 // TODO: Update once there is a fix for the channel size compiler limitation.
 //
 func AssembleFrame64(
+	assembleReq <-chan bool,
 	smiInput <-chan Flit64,
-	smiOutput chan<- Flit64) {
+	smiOutput chan<- Flit64,
+	assembleDone chan<- bool) {
 	smiBuffer := make(chan Flit64, 34 /* SmiMemFrame64Size */)
 
-	hasNextInputFlit := true
-	for hasNextInputFlit {
-		inputFlitData := <-smiInput
-		smiBuffer <- inputFlitData
-		hasNextInputFlit = inputFlitData.Eofc == uint8(0)
-	}
+	for <-assembleReq {
+		hasNextInputFlit := true
+		for hasNextInputFlit {
+			inputFlitData := <-smiInput
+			smiBuffer <- inputFlitData
+			hasNextInputFlit = inputFlitData.Eofc == uint8(0)
+		}
 
-	hasNextOutputFlit := true
-	for hasNextOutputFlit {
-		outputFlitData := <-smiBuffer
-		smiOutput <- outputFlitData
-		hasNextOutputFlit = outputFlitData.Eofc == uint8(0)
+		hasNextOutputFlit := true
+		for hasNextOutputFlit {
+			outputFlitData := <-smiBuffer
+			smiOutput <- outputFlitData
+			hasNextOutputFlit = outputFlitData.Eofc == uint8(0)
+		}
+		assembleDone <- true
 	}
 }
 
@@ -1387,9 +1397,12 @@ func WriteBurstUInt64(
 	burstOffset := uint16(writeAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiWriteChan := make(chan Flit64, 1)
+	asmReqChan := make(chan bool, 1)
+	asmDoneChan := make(chan bool, 1)
+	go AssembleFrame64(asmReqChan, smiWriteChan, smiRequest, asmDoneChan)
 
 	for writeLength != 0 {
-		go AssembleFrame64(smiWriteChan, smiRequest)
+		asmReqChan <- true
 		if writeLength < uint32(burstSize) {
 			burstSize = uint16(writeLength)
 		}
@@ -1399,7 +1412,9 @@ func WriteBurstUInt64(
 		writeAddr += uintptr(burstSize)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-asmDoneChan
 	}
+	asmReqChan <- false
 	return writeOk
 }
 
@@ -1428,9 +1443,12 @@ func WriteBurstUInt32(
 	burstOffset := uint16(writeAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiWriteChan := make(chan Flit64, 1)
+	asmReqChan := make(chan bool, 1)
+	asmDoneChan := make(chan bool, 1)
+	go AssembleFrame64(asmReqChan, smiWriteChan, smiRequest, asmDoneChan)
 
 	for writeLength != 0 {
-		go AssembleFrame64(smiWriteChan, smiRequest)
+		asmReqChan <- true
 		if writeLength < uint32(burstSize) {
 			burstSize = uint16(writeLength)
 		}
@@ -1440,7 +1458,9 @@ func WriteBurstUInt32(
 		writeAddr += uintptr(burstSize)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-asmDoneChan
 	}
+	asmReqChan <- false
 	return writeOk
 }
 
@@ -1469,9 +1489,12 @@ func WriteBurstUInt16(
 	burstOffset := uint16(writeAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiWriteChan := make(chan Flit64, 1)
+	asmReqChan := make(chan bool, 1)
+	asmDoneChan := make(chan bool, 1)
+	go AssembleFrame64(asmReqChan, smiWriteChan, smiRequest, asmDoneChan)
 
 	for writeLength != 0 {
-		go AssembleFrame64(smiWriteChan, smiRequest)
+		asmReqChan <- true
 		if writeLength < uint32(burstSize) {
 			burstSize = uint16(writeLength)
 		}
@@ -1481,7 +1504,9 @@ func WriteBurstUInt16(
 		writeAddr += uintptr(burstSize)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-asmDoneChan
 	}
+	asmReqChan <- false
 	return writeOk
 }
 
@@ -1508,9 +1533,12 @@ func WriteBurstUInt8(
 	burstOffset := uint16(writeAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiWriteChan := make(chan Flit64, 1)
+	asmReqChan := make(chan bool, 1)
+	asmDoneChan := make(chan bool, 1)
+	go AssembleFrame64(asmReqChan, smiWriteChan, smiRequest, asmDoneChan)
 
 	for writeLength != 0 {
-		go AssembleFrame64(smiWriteChan, smiRequest)
+		asmReqChan <- true
 		if writeLength < uint32(burstSize) {
 			burstSize = uint16(writeLength)
 		}
@@ -1520,7 +1548,9 @@ func WriteBurstUInt8(
 		writeAddr += uintptr(burstSize)
 		writeLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-asmDoneChan
 	}
+	asmReqChan <- false
 	return writeOk
 }
 
@@ -2030,9 +2060,12 @@ func ReadBurstUInt64(
 	burstOffset := uint16(readAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiReadChan := make(chan Flit64, 1)
+	fwdReqChan := make(chan bool, 1)
+	fwdDoneChan := make(chan bool, 1)
+	go ForwardFrame64(fwdReqChan, smiResponse, smiReadChan, fwdDoneChan)
 
 	for readLength != 0 {
-		go ForwardFrame64(smiResponse, smiReadChan)
+		fwdReqChan <- true
 		if readLength < uint32(burstSize) {
 			burstSize = uint16(readLength)
 		}
@@ -2042,7 +2075,9 @@ func ReadBurstUInt64(
 		readAddr += uintptr(burstSize)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-fwdDoneChan
 	}
+	fwdReqChan <- false
 	return readOk
 }
 
@@ -2071,9 +2106,12 @@ func ReadBurstUInt32(
 	burstOffset := uint16(readAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiReadChan := make(chan Flit64, 1)
+	fwdReqChan := make(chan bool, 1)
+	fwdDoneChan := make(chan bool, 1)
+	go ForwardFrame64(fwdReqChan, smiResponse, smiReadChan, fwdDoneChan)
 
 	for readLength != 0 {
-		go ForwardFrame64(smiResponse, smiReadChan)
+		fwdReqChan <- true
 		if readLength < uint32(burstSize) {
 			burstSize = uint16(readLength)
 		}
@@ -2083,7 +2121,9 @@ func ReadBurstUInt32(
 		readAddr += uintptr(burstSize)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-fwdDoneChan
 	}
+	fwdReqChan <- false
 	return readOk
 }
 
@@ -2112,9 +2152,12 @@ func ReadBurstUInt16(
 	burstOffset := uint16(readAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiReadChan := make(chan Flit64, 1)
+	fwdReqChan := make(chan bool, 1)
+	fwdDoneChan := make(chan bool, 1)
+	go ForwardFrame64(fwdReqChan, smiResponse, smiReadChan, fwdDoneChan)
 
 	for readLength != 0 {
-		go ForwardFrame64(smiResponse, smiReadChan)
+		fwdReqChan <- true
 		if readLength < uint32(burstSize) {
 			burstSize = uint16(readLength)
 		}
@@ -2124,7 +2167,9 @@ func ReadBurstUInt16(
 		readAddr += uintptr(burstSize)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-fwdDoneChan
 	}
+	fwdReqChan <- false
 	return readOk
 }
 
@@ -2151,9 +2196,12 @@ func ReadBurstUInt8(
 	burstOffset := uint16(readAddr) & uint16(SmiMemBurstSize-1)
 	burstSize := uint16(SmiMemBurstSize) - burstOffset
 	smiReadChan := make(chan Flit64, 1)
+	fwdReqChan := make(chan bool, 1)
+	fwdDoneChan := make(chan bool, 1)
+	go ForwardFrame64(fwdReqChan, smiResponse, smiReadChan, fwdDoneChan)
 
 	for readLength != 0 {
-		go ForwardFrame64(smiResponse, smiReadChan)
+		fwdReqChan <- true
 		if readLength < uint32(burstSize) {
 			burstSize = uint16(readLength)
 		}
@@ -2163,6 +2211,8 @@ func ReadBurstUInt8(
 		readAddr += uintptr(burstSize)
 		readLength -= uint32(burstSize)
 		burstSize = uint16(SmiMemBurstSize)
+		<-fwdDoneChan
 	}
+	fwdReqChan <- false
 	return readOk
 }
