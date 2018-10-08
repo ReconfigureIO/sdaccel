@@ -74,7 +74,8 @@ func ForwardFrame64(
 	forwardDone chan<- bool) {
 	smiBuffer := make(chan Flit64, 34 /* SmiMemFrame64Size */)
 
-	for <-forwardReq {
+	doForward := <-forwardReq
+	for doForward {
 		go func() {
 			hasNextInputFlit := true
 			for hasNextInputFlit {
@@ -91,6 +92,7 @@ func ForwardFrame64(
 			hasNextOutputFlit = outputFlitData.Eofc == uint8(0)
 		}
 		forwardDone <- true
+		doForward = <-forwardReq
 	}
 }
 
@@ -109,7 +111,8 @@ func AssembleFrame64(
 	assembleDone chan<- bool) {
 	smiBuffer := make(chan Flit64, 34 /* SmiMemFrame64Size */)
 
-	for <-assembleReq {
+	doAssemble := <-assembleReq
+	for doAssemble {
 		hasNextInputFlit := true
 		for hasNextInputFlit {
 			inputFlitData := <-smiInput
@@ -124,6 +127,7 @@ func AssembleFrame64(
 			hasNextOutputFlit = outputFlitData.Eofc == uint8(0)
 		}
 		assembleDone <- true
+		doAssemble = <-assembleReq
 	}
 }
 
