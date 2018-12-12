@@ -122,6 +122,14 @@ This needs to be released when done.
 
 */
 func (program *Program) GetKernel(kernelName string) *Kernel {
+	// Vivado 2018.2 started imposing a limit on kernel name length. We're
+	// working around this by renaming the kernel from
+	// "reconfigure_io_sdaccel_builder_stub_0_1" which was used with Vivado
+	// 2017.1 to "rio_sda_stub_0_1".
+	if kernelName == "reconfigure_io_sdaccel_builder_stub_0_1" {
+		kernelName = "rio_sda_stub_0_1"
+	}
+
 	s := C.CString(kernelName)
 	k := C.xcl_get_kernel(C.cl_program(program.program), s)
 	C.free(unsafe.Pointer(s))
