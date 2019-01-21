@@ -4,7 +4,7 @@
 package xcl
 
 // #cgo CFLAGS: -std=gnu99
-// #cgo LDFLAGS: -lxilinxopencl -llmx6.0
+// #cgo LDFLAGS: -lxilinxopencl
 // #include "xcl.h"
 // #include <stdlib.h>
 //
